@@ -1,0 +1,13 @@
+--[[
+					事件设计
+	所有的事件都有这些状态：
+	   fill（填充），create（产生），destroy（销毁），enable（使能），disable（非使能），run（运行）
+	根据不同的条件进行切换：
+	   trigger（触发判断），check_valid（有效性判断），check_enable（使能判断）
+	产生过程：
+	   当遇到事件触发点时，先产生一个事件进行fill，如果初始化后且trigger，然后进入create。
+	运行过程：
+	   首先检查有效性check_valid，如果失败，就进入destroy，事件生命周期结束；
+	   然后检查使能check_enable，如果当前使能状态与检查结果不一致，则根据检查结果做enable、disable，如果一致，无动作；
+	   最后执行run，如果当前使能状态为true，则执行run_when_enable。
+--]]
