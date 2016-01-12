@@ -122,22 +122,22 @@ function action:check_enable()
 	return self.enabled
 end
 
-function action:listen()
+function action:register_event()
 	-- body
 	-- return {} key:action point value:callback
 	return {}
 end
 
 -- example
---function action:listen_cb1( ... )
+--function action:register_event_cb1( ... )
 --	-- body
 --end
 --
---function action:listen_cb2( ... )
+--function action:register_event_cb2( ... )
 --	-- body
 --end
 --
---function action:listen()
+--function action:register_event()
 --	return {['1'] = action.listen_cb1, ['2'] = action.listen_cb2}
 --end
 -- example end

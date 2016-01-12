@@ -6,7 +6,7 @@ action_mgr.free_id = 1
 function action_mgr.init()
 	print( '\nevt mgr init.\n' )
 	action_mgr.events = {}
-	action_mgr.listener = {}
+	action_mgr.broadcaster = {}
 	action_mgr.action_types = {}
 
 	local config = require("_config_action")
@@ -33,12 +33,12 @@ function action_mgr.add_event( evt_type, ... )
 	e:fill(...)
 	if e:trigger() then
 		-- register interest action point
-		for k, v in pairs( e:listen() ) do
+		for k, v in pairs( e:register_event() ) do
 			--get listeners
-			local listerns = action_mgr.listener[k]
+			local listerns = action_mgr.broadcaster[k]
 			if not listerns then
 				listerns = {}
-				action_mgr.listener[k] = listerns
+				action_mgr.broadcaster[k] = listerns
 			end
 
 			local cb = listerns[e]
@@ -59,9 +59,9 @@ function action_mgr.add_event( evt_type, ... )
 	return e.id
 end
 
-function action_mgr.listen( point, ... )
+function action_mgr.broadcast( point, ... )
 	-- body
-	local listeners = action_mgr.listener[point]
+	local listeners = action_mgr.broadcaster[point]
 	if not listeners then
 		return
 	end
@@ -88,7 +88,7 @@ function action_mgr.run(time_delta)
 	for _, v in ipairs( rm ) do
 		print('evt mgr remove action:' .. v)
 		local action = action_mgr.events[v]
-		for k, v in pairs( action_mgr.listener ) do
+		for k, v in pairs( action_mgr.broadcaster ) do
 			if v[action] then
 				v[action] = nil
 			end

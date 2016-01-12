@@ -21,12 +21,12 @@ end
 
 function action_attack:create_ex( ... )
 	-- body
-	action_mgr.listen(common.ENTER_ATTACK, self.unit_id, self.defencer.id)
+	action_mgr.broadcast(common.ENTER_ATTACK, self.unit_id, self.defencer.id)
 end
 
 function action_attack:destroy_ex( ... )
 	-- body
-	action_mgr.listen(common.LEAVE_ATTACK, self.unit_id, self.defencer.id)
+	action_mgr.broadcast(common.LEAVE_ATTACK, self.unit_id, self.defencer.id)
 end
 
 function action_attack:check_valid()
@@ -53,7 +53,7 @@ end
 
 function action_attack:run_when_enable(time_delta)
 	-- body
-	action_mgr.listen(common.ATTACK_BEFORE, self.unit_id, self.defencer.id)
+	action_mgr.broadcast(common.ATTACK_BEFORE, self.unit_id, self.defencer.id)
 	print('action ' .. self.type .. ' run, unit id:' .. self.unit_id .. '|action id:' .. self.id)
 	local left_hp = self.defencer:get_raw_attribute('hp')
 	local damage = self.attacker:get_attribute('str')
@@ -64,7 +64,7 @@ function action_attack:run_when_enable(time_delta)
 
 	self.defencer:set_raw_attribute('hp', left_hp - damage)
 
-	action_mgr.listen(common.ATTACK_AFTER, self.unit_id, self.defencer.id, damage)
+	action_mgr.broadcast(common.ATTACK_AFTER, self.unit_id, self.defencer.id, damage)
 
 	-- 仇恨机制
 	if self.defencer:get_raw_attribute('defence') == 0 then

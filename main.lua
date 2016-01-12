@@ -1,4 +1,4 @@
-local root = 'E:/Punchio/lua-battle/'
+local root = 'D:/Git/lua-battle/'
 package.path = string.format("%s;%s?.lua;%saction/?.lua;%sfsm/?.lua;%sunit/?.lua", package.path, root, root, root, root)
 
 local action_mgr = require("action_mgr")

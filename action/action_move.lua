@@ -20,12 +20,12 @@ end
 
 function action_move:create_ex( ... )
 	-- body
-	action_mgr.listen(common.ENTER_MOVE, self.unit_id)
+	action_mgr.broadcast(common.ENTER_MOVE, self.unit_id)
 end
 
 function action_move:destroy_ex( ... )
 	-- body
-	action_mgr.listen(common.LEAVE_MOVE, self.unit_id)
+	action_mgr.broadcast(common.LEAVE_MOVE, self.unit_id)
 end
 
 function action_move:check_valid()
@@ -52,23 +52,9 @@ end
 function action_move:run_when_enable(time_delta)
 	-- body
 	print('action ' .. self.type .. ' run_when_enable, id:' .. self.id .. '|unit id:' .. self.unit_id)
-	action_mgr.listen(common.MOVE_BEFORE, self.unit_id, self.unit:get_raw_attribute('pos'))
+	action_mgr.broadcast(common.MOVE_BEFORE, self.unit_id, self.unit:get_raw_attribute('pos'))
 	unit_helper.move(self.unit, time_delta)
-	action_mgr.listen(common.MOVE_AFTER, self.unit_id, self.unit:get_raw_attribute('pos'))
-end
-
-function action_move:listen_cb1( ... )
-	-- body
-	print('enter move')
-end
-
-function action_move:listen_cb2( ... )
-	-- body
-	print('enter leave')
-end
-
-function action_move:listen()
-	return {[common.ENTER_MOVE] = action_move.listen_cb1, [common.LEAVE_MOVE] = action_move.listen_cb2}
+	action_mgr.broadcast(common.MOVE_AFTER, self.unit_id, self.unit:get_raw_attribute('pos'))
 end
 
 return action_move
