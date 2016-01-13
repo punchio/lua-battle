@@ -33,7 +33,7 @@ end
 function action_attack:check_valid()
 	-- body
 	if self.defencer:get_raw_attribute('hp') == 0 then
-		print('action ' .. self.type .. ' check_valid, id:' .. self.id .. ' target dead.')
+		print('action ' .. self.type .. ' check_valid, id:' .. self.id .. ' target ' .. self.defencer.id ..' dead.')
 		return false
 	end
 

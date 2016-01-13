@@ -21,6 +21,7 @@ local attribute_type = {
 	spelling_time = 15,
 	alive_time = 16,
 	dead_time = 17,
+	ai = 18,
 }
 
 function unit:ctor(...)
@@ -63,7 +64,7 @@ function unit:get_raw_attribute(attr)
 	-- body
 	local value_str
 	if not self.attribute[attr] then
-		value_str = ''
+		value_str = 'nil'
 	elseif type(self.attribute[attr]) == 'table' then
 		value_str = ''
 		for _, v in pairs( self.attribute[attr] ) do

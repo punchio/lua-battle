@@ -2,6 +2,7 @@ require("new")
 local unit = require("unit")
 local unit_mgr = require("unit_mgr")
 local fsm_mgr = require("fsm_mgr")
+local ai_mgr = require("example")
 
 local unit_helper = {}
 
@@ -155,7 +156,7 @@ function unit_helper.get_move_pos( u )
 		end
 		return tar:get_raw_attribute('pos')
 	elseif t == 'table' then
-		return t
+		return move
 	end
 
 	return nil
@@ -248,6 +249,23 @@ end
 
 function unit_helper.update(time_delta)
 	--input operations
+	for _, v in pairs( unit_mgr.units ) do
+		if v:get_raw_attribute('state_id') == 'idle' then
+			local unit_ai = ai_mgr[v.id]
+			if unit_ai then
+				print('unit id:' .. v.id .. '|type u:' .. type(unit_ai) .. '|length:' .. #unit_ai)
+				local idx = v:get_raw_attribute('ai') or 1
+				if idx > #unit_ai then
+					idx = 1
+				end
+				print('idx:' .. idx)
+				local ai = unit_ai[idx]
+				print('type value:' .. type(ai['value']) .. ' idx:' .. idx)
+				v:set_raw_attribute(ai['action'], ai['value'])
+				v:set_raw_attribute('ai', idx + 1)
+			end
+		end
+	end
 end
 
 return unit_helper

@@ -16,7 +16,7 @@ function action_spell_damage:fill( ... )
 	self.unit_id = ...
 	self.unit = unit_helper.get_unit(self.unit_id)
 
-	self.last_time = skill_config[1]['time']
+	self.last_time = skill_config[1]['damage']['time']
 	self.period = skill_config[1]['damage']['period']
 	self.run_time = 0
 	self.spell_time = 0
@@ -52,14 +52,16 @@ function action_spell_damage:run_when_enable(time_delta)
 	local damage = skill_config[1]['damage']
 	if damage then
 		for k, v in pairs( damage ) do
-			local dmg = self.unit:get_attribute(k) * v
-			print('action skill unit id:' .. self.unit.id .. '|action id:' .. self.id .. '|damage:' .. dmg)
-			local enemy_units = unit_helper.get_enemy_units(self.unit:get_raw_attribute('side'))
-			for _, _v in ipairs( enemy_units ) do
-				print('action skill unit id:' .. self.unit.id .. '|damage to unit:' .. _v.id .. '|damage:' .. dmg)
-				local hp = _v:get_raw_attribute('hp')
-				hp = (hp > dmg and (hp - dmg) or 0)
-				_v:set_raw_attribute('hp', hp)
+			if k == 'str' then
+				local dmg = self.unit:get_attribute(k) * v
+				print('action skill unit id:' .. self.unit.id .. '|action id:' .. self.id .. '|damage:' .. dmg)
+				local enemy_units = unit_helper.get_enemy_units(self.unit:get_raw_attribute('side'))
+				for _, _v in ipairs( enemy_units ) do
+					print('action skill unit id:' .. self.unit.id .. '|damage to unit:' .. _v.id .. '|damage:' .. dmg)
+					local hp = _v:get_raw_attribute('hp')
+					hp = (hp > dmg and (hp - dmg) or 0)
+					_v:set_raw_attribute('hp', hp)
+				end
 			end
 		end
 

@@ -1,4 +1,5 @@
 require 'new'
+local unit_helper = require("unit_helper")
 
 local state = {}
 
@@ -49,7 +50,7 @@ function state:check_transition(unit)
 		end
 	end
 
-	return self:check_transition_ex(unit)
+	return 'idle'--self:check_transition_ex(unit)
 end
 
 function state:check_transition_ex(unit)

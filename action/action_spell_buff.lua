@@ -16,7 +16,7 @@ function action_spell_buff:fill( ... )
 	self.unit_id = ...
 	self.unit = unit_helper.get_unit(self.unit_id)
 
-	self.last_time = skill_config[1]['time']
+	self.last_time = skill_config[1]['buff']['time']
 	--self.spell_time = skill_config[1]['spell_time'] or 0
 
 	-- if last time less than spell time, it cannot exit spell state.
@@ -46,17 +46,19 @@ function action_spell_buff:enable_ex()
 	local buff = skill_config[1]['buff']
 	if buff then
 		for k, v in pairs( buff ) do
-			self.unit:get_attribute(k)
-			local buff_id
-			buff_id = self.unit:add_attr_buff(k, 'base_value', v[1])
-			table.insert(self.buff_ids, buff_id)
-
-			buff_id = self.unit:add_attr_buff(k, 'base_percent', v[2])
-			table.insert(self.buff_ids, buff_id)
-
-			buff_id = self.unit:add_attr_buff(k, 'total_percent', v[3])
-			table.insert(self.buff_ids, buff_id)
-			self.unit:get_attribute(k)
+			if type(v) ~= 'number' then
+				self.unit:get_attribute(k)
+				local buff_id
+				buff_id = self.unit:add_attr_buff(k, 'base_value', v[1])
+				table.insert(self.buff_ids, buff_id)
+	
+				buff_id = self.unit:add_attr_buff(k, 'base_percent', v[2])
+				table.insert(self.buff_ids, buff_id)
+	
+				buff_id = self.unit:add_attr_buff(k, 'total_percent', v[3])
+				table.insert(self.buff_ids, buff_id)
+				self.unit:get_attribute(k)
+			end
 		end
 	end
 end

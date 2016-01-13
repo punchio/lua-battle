@@ -9,35 +9,29 @@
 --]]
 
 local actions = {
-	{ 1, --unit id
-	  {
-		[1] = {action = 'move', target = 2}		-- frame = 1, action = move, target = unit 1
-		[3] = {action = 'attack', target = 2}
-		[5] = {action = 'spell', target = 2}
-	  }
+	[1] = { -- unit id
+		{action = 'move', value = {10, 20, 30}},		-- frame = 1, action = move, value = unit 1
+		{action = 'spell'},
+		{action = 'attack', value = 2}
 	}
 	,
-	{ 2,
-	  {
-		[1] = {action = 'move', target = 1}
-		[3] = {action = 'attack', target = 1}
-		[5] = {action = 'spell', target = 1}
-	  }
+	[2] = {
+		{action = 'move', value =  {10, 20, 30}},
+		{action = 'attack', value = 1},
+		--{action = 'spell', value = 1}
 	}
 	,
-	{ 3,
-	  {
-		[1] = {action = 'move', target = 4}
-		[3] = {action = 'attack', target = 4}
-		[5] = {action = 'spell', target = 4}
-	  }
+	[3] = {
+		{action = 'move', value =  {10, 20, 30}},
+		{action = 'spell'},
+		{action = 'attack', value = 4}
 	}
 	,
-	{ 4,
-	  {
-		[1] = {action = 'move', target = 1}
-		[3] = {action = 'attack', target = 1}
-		[5] = {action = 'spell', target = 1}
-	  }
+	[4] = {
+		{action = 'move', value =  {10, 20, 30}},
+		{action = 'attack', value = 1},
+		--{action = 'spell', value = 1}
 	}
 }
+
+return actions
