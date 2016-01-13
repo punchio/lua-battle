@@ -11,16 +11,7 @@ local unit_helper = require("unit_helper")
 
 function state_attack:enter(unit)
 	print('fsm enter:' .. self.id .. ' unit:' .. unit.id)
-	action_mgr.add_event('attack_enter', unit.id)
-end
-
-function state_attack:exit(unit)
-	print( 'fsm exit:' .. self.id )
-end
-
-function state_attack:check_transition_ex(unit)
-	print('fsm check transition ex:' .. self.id)
-	return self.id
+	action_mgr.add_action('attack', unit.id)
 end
 
 return state_attack

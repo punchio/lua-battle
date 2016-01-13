@@ -76,7 +76,7 @@ function action:disable_ex()
 end
 
 function action:run(time_delta)
-	print('\nevent run id:' .. self.id .. '|type:' .. self.type)
+	print('\naction run id:' .. self.id .. '|type:' .. self.type)
 	if not self.valid then
 		return
 	end
@@ -122,22 +122,22 @@ function action:check_enable()
 	return self.enabled
 end
 
-function action:register_event()
+function action:register_action()
 	-- body
 	-- return {} key:action point value:callback
 	return {}
 end
 
 -- example
---function action:register_event_cb1( ... )
+--function action:register_action_cb1( ... )
 --	-- body
 --end
 --
---function action:register_event_cb2( ... )
+--function action:register_action_cb2( ... )
 --	-- body
 --end
 --
---function action:register_event()
+--function action:register_action()
 --	return {['1'] = action.listen_cb1, ['2'] = action.listen_cb2}
 --end
 -- example end

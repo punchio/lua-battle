@@ -5,7 +5,7 @@ action_mgr.free_id = 1
 
 function action_mgr.init()
 	print( '\nevt mgr init.\n' )
-	action_mgr.events = {}
+	action_mgr.actions = {}
 	action_mgr.broadcaster = {}
 	action_mgr.action_types = {}
 
@@ -21,7 +21,7 @@ function action_mgr.init()
 	end
 end
 
-function action_mgr.add_event( evt_type, ... )
+function action_mgr.add_action( evt_type, ... )
 	print('evt mgr add action:' .. evt_type)
 	local evt = action_mgr.action_types[evt_type]
 	if not evt then
@@ -33,7 +33,7 @@ function action_mgr.add_event( evt_type, ... )
 	e:fill(...)
 	if e:trigger() then
 		-- register interest action point
-		for k, v in pairs( e:register_event() ) do
+		for k, v in pairs( e:register_action() ) do
 			--get listeners
 			local listerns = action_mgr.broadcaster[k]
 			if not listerns then
@@ -52,7 +52,7 @@ function action_mgr.add_event( evt_type, ... )
 
 		e:create()
 
-		action_mgr.events[e.id] = e
+		action_mgr.actions[e.id] = e
 		print('action_mgr add action:' .. e.id)
 	end
 
@@ -78,7 +78,7 @@ function action_mgr.run(time_delta)
 	print('\nevt mgr run.\n')
 
 	local rm = {}
-	for k, v in pairs( action_mgr.events ) do
+	for k, v in pairs( action_mgr.actions ) do
 		v:run(time_delta)
 		if not v.valid then
 			table.insert(rm, k)
@@ -87,14 +87,14 @@ function action_mgr.run(time_delta)
 
 	for _, v in ipairs( rm ) do
 		print('evt mgr remove action:' .. v)
-		local action = action_mgr.events[v]
-		for k, v in pairs( action_mgr.broadcaster ) do
-			if v[action] then
-				v[action] = nil
+		local action = action_mgr.actions[v]
+		for _, _v in pairs( action_mgr.broadcaster ) do
+			if _v[action] then
+				_v[action] = nil
 			end
 		end
 
-		action_mgr.events[v] = nil
+		action_mgr.actions[v] = nil
 	end
 end
 

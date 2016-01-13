@@ -11,17 +11,7 @@ local unit_helper = require("unit_helper")
 
 function state_move:enter(unit)
 	print('fsm enter:' .. self.id .. ' unit:' .. unit.id)
-	action_mgr.add_event('move', unit.id)
-end
-
-function state_move:exit(unit)
-	print( 'fsm exit:' .. self.id )
-end
-
-function state_move:check_transition_ex(unit)
-	print('fsm check transition ex:' .. self.id)
-
-	return self.id
+	action_mgr.add_action('move', unit.id)
 end
 
 return state_move

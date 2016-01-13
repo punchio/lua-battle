@@ -247,25 +247,7 @@ function unit_helper.init()
 end
 
 function unit_helper.update(time_delta)
-	-- body
-	--for _, v in pairs( unit_mgr.units ) do
-	--	local r = math.random()
-	--	if r < 0.1 then
-	--		--unit_helper.flee_from_enemy(v)
-	--	--elseif r < 0.3 then
-	--		print('unit_helper.update unit id:' .. v.id)
-	--		unit_helper.rand_move_to_enemy(v)
-	--	end
-
-	--	local t = v:get_raw_attribute('alive_time') or 0
-	--	if t > 30 then
-	--		v:set_raw_attribute('hp', 0)
-	--	else
-	--		--v:set_raw_attribute('alive_time', t + 1)
-	--	end
-	--end
-
-
+	--input operations
 end
 
 return unit_helper

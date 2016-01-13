@@ -18,7 +18,7 @@ function action_special_attack:fill( ... )
 	print('action ' .. self.type .. ' ctor, id:' .. self.id .. '|unit id:' .. self.unit_id)
 end
 
-function action_special_attack:event_run( ... )
+function action_special_attack:action_run( ... )
 	-- body
 	print('enter move')
 	local attack_id, defence_id = ...
@@ -44,11 +44,11 @@ function action_special_attack:event_run( ... )
 	print('action ' .. self.type .. ' attacker:' .. self.unit_id .. ' attack defencer:' .. defence_id .. ' ' .. damage .. '.');
 end
 
-function action_special_attack:register_event_cb2( ... )
+function action_special_attack:register_action_cb2( ... )
 	-- body
 	print('enter leave')
 end
 
-function action_special_attack:register_event()
-	return {[common.ENTER_ATTACK] = action_move.event_run}
+function action_special_attack:register_action()
+	return {[common.ENTER_ATTACK] = action_move.action_run}
 end

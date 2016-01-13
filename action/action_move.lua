@@ -25,6 +25,7 @@ end
 
 function action_move:destroy_ex( ... )
 	-- body
+	self.unit:set_raw_attribute('move', nil)
 	action_mgr.broadcast(common.LEAVE_MOVE, self.unit_id)
 end
 
@@ -37,7 +38,6 @@ function action_move:check_valid()
 
 	local move = unit_helper.get_move_pos(self.unit)
 	if not move or unit_helper.distance(self.unit:get_raw_attribute('pos'), move) < 2 then
-		self.unit:set_raw_attribute('move', nil)
 		return false
 	end
 

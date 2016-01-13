@@ -14,8 +14,8 @@ end
 function action_attack:fill( ... )
 	-- body
 	self.unit_id = ...
-	self.attacker = unit_helper.get_unit(self.unit_id)
-	self.defencer = unit_helper.get_unit(self.attacker:get_raw_attribute('attack'))
+	self.unit = unit_helper.get_unit(self.unit_id)
+	self.defencer = unit_helper.get_unit(self.unit:get_raw_attribute('attack'))
 	print('action ' .. self.type .. ' ctor, id:' .. self.id .. '|unit id:' .. self.unit_id)
 end
 
@@ -26,6 +26,7 @@ end
 
 function action_attack:destroy_ex( ... )
 	-- body
+	self.unit:set_raw_attribute('attack', 0)
 	action_mgr.broadcast(common.LEAVE_ATTACK, self.unit_id, self.defencer.id)
 end
 
@@ -36,13 +37,13 @@ function action_attack:check_valid()
 		return false
 	end
 
-	local dist = unit_helper.distance(self.attacker:get_raw_attribute('pos'), self.defencer:get_raw_attribute('pos'))
-	if dist < self.attacker:get_raw_attribute('attack_range') then
-		print('action ' .. self.type .. ' check_valid, id:' .. self.id .. ' return true')
+	local dist = unit_helper.distance(self.unit:get_raw_attribute('pos'), self.defencer:get_raw_attribute('pos'))
+	if dist < self.unit:get_raw_attribute('attack_range') then
+		--print('action ' .. self.type .. ' check_valid, id:' .. self.id .. ' return true')
 		return true
 	end
 
-	print('action ' .. self.type .. ' check_valid, id:' .. self.id .. ' return false')
+	print('action ' .. self.type .. ' check_valid, id:' .. self.id .. ' out of range.')
 	return false
 end
 
@@ -56,7 +57,7 @@ function action_attack:run_when_enable(time_delta)
 	action_mgr.broadcast(common.ATTACK_BEFORE, self.unit_id, self.defencer.id)
 	print('action ' .. self.type .. ' run, unit id:' .. self.unit_id .. '|action id:' .. self.id)
 	local left_hp = self.defencer:get_raw_attribute('hp')
-	local damage = self.attacker:get_attribute('str')
+	local damage = self.unit:get_attribute('str')
 	
 	if left_hp < damage then
 		damage = left_hp

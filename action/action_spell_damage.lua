@@ -19,6 +19,7 @@ function action_spell_damage:fill( ... )
 	self.last_time = skill_config[1]['time']
 	self.period = skill_config[1]['damage']['period']
 	self.run_time = 0
+	self.spell_time = 0
 
 	print('action ' .. self.type .. ' fill, id:' .. self.id .. '|unit id:' .. self.unit_id)
 end
@@ -45,7 +46,7 @@ function action_spell_damage:run_when_enable(time_delta)
 	if self.run_time - self.spell_time < self.period then
 		return
 	end
-	action_mgr.broadcast(common.SPELL_BEFORE, self.unit_id)
+
 	self.spell_time = self.run_time
 
 	local damage = skill_config[1]['damage']
@@ -54,16 +55,15 @@ function action_spell_damage:run_when_enable(time_delta)
 			local dmg = self.unit:get_attribute(k) * v
 			print('action skill unit id:' .. self.unit.id .. '|action id:' .. self.id .. '|damage:' .. dmg)
 			local enemy_units = unit_helper.get_enemy_units(self.unit:get_raw_attribute('side'))
-			for _, v in ipairs( enemy_units ) do
-				print('action skill unit id:' .. self.unit.id .. '|damage to unit:' .. v.id .. '|damage:' .. dmg)
-				local hp = v:get_raw_attribute('hp')
+			for _, _v in ipairs( enemy_units ) do
+				print('action skill unit id:' .. self.unit.id .. '|damage to unit:' .. _v.id .. '|damage:' .. dmg)
+				local hp = _v:get_raw_attribute('hp')
 				hp = (hp > dmg and (hp - dmg) or 0)
-				v:set_raw_attribute('hp', hp)
+				_v:set_raw_attribute('hp', hp)
 			end
 		end
 
 	end
-	action_mgr.broadcast(common.SPELL_AFTER, self.unit_id)
 end
 
 return action_spell_damage
