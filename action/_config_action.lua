@@ -3,6 +3,8 @@ local config = {
 	"action_attack",
 	"action_move",
 	"action_spell",
+	"action_spell_buff",
+	"action_spell_damage",
 }
 -- end
 return config

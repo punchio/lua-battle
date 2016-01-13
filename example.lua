@@ -7,3 +7,9 @@
 6. 被动技能
 7. 复杂技能
 --]]
+
+local actions = {
+	[1] = {unit = 1, action = 'move', target = 1}
+	[3] = {unit = 2, action = 'attack', target = 1}
+	[5] = {unit = 3, action = 'spell', target = 1}
+}
