@@ -10,27 +10,31 @@
 
 local actions = {
 	[1] = { -- unit id
-		{action = 'move', value = {10, 20, 30}},		-- frame = 1, action = move, value = unit 1
-		{action = 'spell'},
-		{action = 'attack', value = 2}
+		{action = 'spell', value = 1},
+		{action = 'attack'},
+		{action = 'move', value = {0, 0, 0}},
+		{action = 'attack'},
 	}
 	,
 	[2] = {
-		{action = 'move', value =  {10, 20, 30}},
+		{action = 'move', value =  {0, 0, 0}},
 		{action = 'attack', value = 1},
-		--{action = 'spell', value = 1}
+		{action = 'spell', value = 2},
+		{action = 'attack'},
 	}
 	,
 	[3] = {
-		{action = 'move', value =  {10, 20, 30}},
-		{action = 'spell'},
-		{action = 'attack', value = 4}
+		{action = 'move', value =  {0, 0, 0}},
+		{action = 'attack', value = 4},
+		{action = 'spell', value = 3},
+		{action = 'attack'},
 	}
 	,
 	[4] = {
-		{action = 'move', value =  {10, 20, 30}},
 		{action = 'attack', value = 1},
-		--{action = 'spell', value = 1}
+		{action = 'spell', value = 4},
+		{action = 'move', value =  {0, 0, 0}},
+		{action = 'attack'},
 	}
 }
 

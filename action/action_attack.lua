@@ -55,8 +55,9 @@ end
 function action_attack:run_when_enable(time_delta)
 	-- body
 	action_mgr.broadcast(common.ATTACK_BEFORE, self.unit_id, self.defencer.id)
-	print('action ' .. self.type .. ' run, unit id:' .. self.unit_id .. '|action id:' .. self.id)
+	print('action ' .. self.type .. ' run when enable, unit id:' .. self.unit_id .. '|action id:' .. self.id)
 	local left_hp = self.defencer:get_raw_attribute('hp')
+	self.unit:get_raw_attribute('str')
 	local damage = self.unit:get_attribute('str')
 	
 	if left_hp < damage then

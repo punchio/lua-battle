@@ -49,8 +49,8 @@ function action_spell:run_ex(time_delta)
 	if not self.spelling and self.run_time >= self.ready_time then
 		self.spelling = true
 		action_mgr.broadcast(common.SPELL_BEFORE, self.unit_id)
-		action_mgr.add_action( 'spell_buff', self.unit_id)
-		action_mgr.add_action( 'spell_damage', self.unit_id)
+		action_mgr.add_action( 'spell_buff', self.unit_id, self.unit:get_raw_attribute('spell'))
+		action_mgr.add_action( 'spell_damage', self.unit_id, self.unit:get_raw_attribute('spell'))
 		action_mgr.broadcast(common.SPELL_AFTER, self.unit_id)
 	end
 end

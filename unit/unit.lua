@@ -22,6 +22,7 @@ local attribute_type = {
 	alive_time = 16,
 	dead_time = 17,
 	ai = 18,
+	['auto-attack'] = 19,
 }
 
 function unit:ctor(...)
@@ -122,15 +123,18 @@ function unit:get_attribute(attr)
 			elseif v.change_type == "base_percent" then
 				base_percent = base_percent + v.change_value
 			elseif v.change_type == "total_percent" then
-				total_percent = total_percent * v.change_value
+				total_percent = total_percent * (1 + v.change_value)
 			end
 		end
 		ret_value = base_value * base_percent * total_percent
 	end
 
-	--print('unit get attribute id:' .. self.id .. 
-	--	'|attr:' .. attr .. 
-	--	'|value:' .. ret_value)
+	print('unit get attribute id:' .. self.id .. 
+		'|attr:' .. attr .. 
+		'|base_value:' .. base_value ..
+		'|base_percent:' .. base_percent ..
+		'|total_percent:' .. total_percent ..
+		'|value:' .. ret_value)
 
 	return ret_value
 end
@@ -173,6 +177,13 @@ function unit:remove_attr_buff( buff_id )
 	end
 	--]]
 	self.buffs[buff_id] = nil
+end
+
+function unit:clear_state()
+	-- body
+	self.attribute['move'] = nil
+	self.attribute['attack'] = 0
+	self.attribute['spell'] = 0
 end
 
 return unit

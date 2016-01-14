@@ -13,11 +13,11 @@ function unit_helper.random_unit( )
 	u:set_raw_attribute('side', u.id % 2)
 	print('side:' .. u:get_raw_attribute('side'))
 
-	u:set_raw_attribute('maxhp', 100)
-	u:set_raw_attribute('hp', 100)
+	u:set_raw_attribute('maxhp', 1000)
+	u:set_raw_attribute('hp', 1000)
 	print('hp:' .. u:get_raw_attribute('hp'))
 
-	u:set_raw_attribute('str', math.random(10) + 50)
+	u:set_raw_attribute('str', math.random(20) + 50)
 	print('str:' .. u:get_raw_attribute('str'))
 
 	u:set_raw_attribute('vel', math.random(3) + 3)
@@ -88,7 +88,7 @@ function unit_helper.attack_nearby(u)
 	end
 
 	if target then
-		unit:set_raw_attribute('attack', target.id)
+		u:set_raw_attribute('attack', target.id)
 		print('unit:' .. u.id .. ' get target:' .. target.id)
 	else
 		print('unit:' .. u.id .. ' cant find nearby target.')
@@ -235,7 +235,7 @@ function unit_helper.check_finish()
 			end
 		end
 	end
-
+	print('win side:' .. alive_side)
 	return true
 end
 
@@ -247,21 +247,51 @@ function unit_helper.init()
 	end
 end
 
+function unit_helper.add_unit(side, force, hp, skill, posx, posy, range, velocity)
+	-- body
+	local u = new(unit, unit_mgr.pop_free_id())
+	u:set_raw_attribute('side', side)
+	u:set_raw_attribute('maxhp', hp)
+	u:set_raw_attribute('hp', hp)
+	u:set_raw_attribute('str', force)
+	u:set_raw_attribute('vel', velocity)
+	u:set_raw_attribute('pos', {posx, 0, posy})
+	u:set_raw_attribute('attack_range', range)
+	u:set_raw_attribute('skill', skill)
+	--default value
+	u:set_raw_attribute('move', nil)
+	u:set_raw_attribute('attack', 0)
+	u:set_raw_attribute('defence', 0)
+	u:set_raw_attribute('spell', 0)
+	v:set_raw_attribute('auto-attack', false)
+	--u:set_raw_attribute('attack_time', 0)
+	--u:set_raw_attribute('attack_speed', 0)
+	u:set_raw_attribute('state_id', 'invalid')
+end
+
 function unit_helper.update(time_delta)
 	--input operations
 	for _, v in pairs( unit_mgr.units ) do
 		if v:get_raw_attribute('state_id') == 'idle' then
 			local unit_ai = ai_mgr[v.id]
 			if unit_ai then
-				print('unit id:' .. v.id .. '|type u:' .. type(unit_ai) .. '|length:' .. #unit_ai)
+				print('unit id:' .. v.id .. '|length:' .. #unit_ai)
 				local idx = v:get_raw_attribute('ai') or 1
 				if idx > #unit_ai then
 					idx = 1
+					print( 'max to 1:' .. v.id )
 				end
 				print('idx:' .. idx)
-				local ai = unit_ai[idx]
-				print('type value:' .. type(ai['value']) .. ' idx:' .. idx)
-				v:set_raw_attribute(ai['action'], ai['value'])
+				local action, value = unit_ai[idx]['action'], unit_ai[idx]['value']
+				print('action:' .. action)
+				if action == 'attack' and not value then
+					action = 'auto-attack'
+					value = true
+				else
+					v:set_raw_attribute('auto-attack', false)
+				end
+				--print('action:' .. action .. '|value:' .. value)
+				v:set_raw_attribute(action, value)
 				v:set_raw_attribute('ai', idx + 1)
 			end
 		end

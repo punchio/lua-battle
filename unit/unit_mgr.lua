@@ -42,4 +42,27 @@ function unit_mgr.pop_free_id( )
 	return id
 end
 
+--function unit_mgr.add_unit(side, force, hp, skill, posx, posy, range, velocity)
+--	-- body
+--	local u = new(unit, unit_mgr.pop_free_id())
+--	u:set_raw_attribute('side', side)
+--	u:set_raw_attribute('maxhp', hp)
+--	u:set_raw_attribute('hp', hp)
+--	u:set_raw_attribute('str', force)
+--	u:set_raw_attribute('vel', velocity)
+--	u:set_raw_attribute('pos', {posx, 0, posy})
+--	u:set_raw_attribute('attack_range', range)
+--	u:set_raw_attribute('skill', skill)
+--	
+--	--default value
+--	u:set_raw_attribute('move', nil)
+--	u:set_raw_attribute('attack', 0)
+--	u:set_raw_attribute('defence', 0)
+--	u:set_raw_attribute('spell', 0)
+--	u:set_raw_attribute('state_id', 'invalid')
+--	--u:set_raw_attribute('attack_time', 0)
+--	--u:set_raw_attribute('attack_speed', 0)
+--	
+--end
+
 return unit_mgr
