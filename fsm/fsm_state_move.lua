@@ -14,4 +14,11 @@ function state_move:enter(unit)
 	action_mgr.add_action('move', unit.id)
 end
 
+function state_move:check_transition_ex( unit )
+	-- body
+	if not unit:get_raw_attribute('can-move') then
+		return
+	end
+end
+
 return state_move

@@ -16,9 +16,9 @@ function action_spell:fill( ... )
 	-- body
 	self.unit_id = ...
 	self.unit = unit_helper.get_unit(self.unit_id)
-
-	self.ready_time = skill_config[1]['ready_time'] or 0
-	self.spell_time = skill_config[1]['spell_time'] or 0
+	self.spell_id = self.unit:get_raw_attribute('spell')
+	self.ready_time = skill_config[self.spell_id]['ready_time'] or 0
+	self.spell_time = skill_config[self.spell_id]['spell_time'] or 0
 	self.total_time = self.ready_time + self.spell_time + 1
 	self.spelling = false
 	self.run_time = 0

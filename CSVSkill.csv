@@ -1,0 +1,11 @@
+spell																
+技能释放	目标选择	释放时间	持续时间	技能效果		attribute_enhance	buff_time	buff_effect	buff	buff_time	buff_effect	damage	damage_time	damage_effect	op_type	attr_type
+id	target	spell_time	last_time	buff_id											1	
+1	1	0.2	10	"addbuff(1, 100,100)"		1	100	100							2	
+															3	
+																
+skill																
+技能效果	持续时间	间隔作用时间	技能参数													
+1	10	1	"addbuff('str', 1, 10, 10);addbuff('intel', 1, 10, 10);"													
+2	10	1	1-0.321|2-0.6													
+			getstr() * 1；addbuff（）													
