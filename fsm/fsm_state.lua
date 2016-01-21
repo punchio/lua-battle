@@ -1,4 +1,3 @@
-require 'new'
 local unit_helper = require("unit_helper")
 
 local state = {}

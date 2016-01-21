@@ -31,6 +31,7 @@ function unit:ctor(...)
 	self.free_buff_id = 1
 	self.buffs = {}
 	self.attribute = {}
+	self.state = {}
 	--t.buff_attribute = {}
 	print('unit ctor id:' .. self.id)
 end

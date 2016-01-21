@@ -1,11 +1,13 @@
-spell																
-¼¼ÄÜÊÍ·Å	Ä¿±êÑ¡Ôñ	ÊÍ·ÅÊ±¼ä	³ÖĞøÊ±¼ä	¼¼ÄÜĞ§¹û		attribute_enhance	buff_time	buff_effect	buff	buff_time	buff_effect	damage	damage_time	damage_effect	op_type	attr_type
-id	target	spell_time	last_time	buff_id											1	
-1	1	0.2	10	"addbuff(1, 100,100)"		1	100	100							2	
-															3	
-																
-skill																
-¼¼ÄÜĞ§¹û	³ÖĞøÊ±¼ä	¼ä¸ô×÷ÓÃÊ±¼ä	¼¼ÄÜ²ÎÊı													
-1	10	1	"addbuff('str', 1, 10, 10);addbuff('intel', 1, 10, 10);"													
-2	10	1	1-0.321|2-0.6													
-			getstr() * 1£»addbuff£¨£©													
+ï»¿æŠ€èƒ½,,,,,
+id,ç›®æ ‡,é‡Šæ”¾æ¡ä»¶,å‰æ‘‡,åæ‘‡,ä½œç”¨
+1,,distance() < 5;,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+buff,,,,,
+id,æŒç»­æ¡ä»¶,æŒç»­æ—¶é—´,é—´éš”æ—¶é—´,ä½œç”¨,
