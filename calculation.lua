@@ -1,3 +1,4 @@
+--[[
 local calc = {}
 calc.env_funcs = {}
 
@@ -46,7 +47,34 @@ calc.env_funcs['get_unit'] = get_unit
 function calculate( express, ... )
 	-- body
 	local fc = load(express, nil, 'bt', calc.env_funcs)
-	return fc()
+	return fc(...)
 end
 
-print(calculate('local u = get_unit(); return get_hp(u) + get_agi(u) + get_attr("str", u);'))
+print(calculate('local u = get_unit(); return get_hp(u) + get_agi(u) + get_attr("str", u);', 1, 2, 3))
+--]]
+
+SkillCalculate = {}
+
+local formulas = {}
+
+function SkillCalculate.init()
+	-- csv env config
+	-- function name, function string
+	-- calc.env_funcs['function name'] = load('function string')
+	calc.env_funcs['get_hp'] = load('return get_attr("hp")')
+
+	-- csv skill config
+	-- function key, function string
+	-- calc.env_funcs['function key'] = load('function string')()
+	formulas[1] =  load("return function() return get_str() end", nil, nil, calc.env_funcs)()
+	formulas[4] =  load("return function(attr) return get_attr(attr) end", nil, nil, calc.env_funcs)()
+end
+
+function SkillCalculate.Calculate( express, ... )
+	local func = formulas[express]
+	if not func then
+		func = load(expresss, nil, nil, calc.env_funcs)()
+		formulas[express] = func
+	end
+	return func(...)
+end
