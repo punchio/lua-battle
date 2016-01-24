@@ -1,10 +1,16 @@
 local root = 'D:/Git/lua-battle/'
 package.path = string.format("%s;%s?.lua;%saction/?.lua;%sfsm/?.lua;%sunit/?.lua", package.path, root, root, root, root)
 
+local timer_mgr = require('timer_mgr')
 local action_mgr = require("action_mgr")
 local fsm_mgr = require("fsm_mgr")
 local unit_mgr = require("unit_mgr")
 local unit_helper = require("unit_helper")
+
+g_unit = nil
+function get_attribute( at)
+	return g_unit:get_raw_attribute(at)
+end
 
 --local function print()
 	-- body
@@ -12,6 +18,7 @@ local unit_helper = require("unit_helper")
 --math.randomseed(0)
 --_G['print'] = print
 local main = function ( )
+	local cost_time = os.clock()
 	print('main start...')
 	local time = 1
 	action_mgr.init()
@@ -21,6 +28,7 @@ local main = function ( )
 
 	while true do
 		print('\n\n---------------frame:' .. time .. '---------------')
+		timer_mgr.update()
 		unit_helper.update()
 		fsm_mgr.update(1)
 		action_mgr.run(1)
@@ -41,7 +49,10 @@ local main = function ( )
 		end
 	end
 		
-
+	print( os.clock() - cost_time )
+	g_unit = unit_helper.random_unit()
+	local sc = 'return (get_attribute("str") * get_attribute("hp"))'
+	print(load(sc)())
 end
 
 main()
