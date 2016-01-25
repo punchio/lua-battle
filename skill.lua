@@ -1,38 +1,38 @@
-local skill_action = {}
+local skill = {}
 
-function skill_action:ctor( ... )
+function skill:ctor( ... )
 	-- body
 	self.state = 'init'
 end
 
-function skill_action:cost( ... )
+function skill:cost( ... )
 	-- body
 end
 
-function skill_action:target( ... )
+function skill:target( ... )
 	-- body
 end
 
-function skill_action:condition( ... )
+function skill:condition( ... )
 	-- ok, wait, unexist
 	return 'ok'
 end
 
-function skill_action:ready( ... )
+function skill:ready( ... )
 	-- body
 end
 
-function skill_action:over( ... )
+function skill:over( ... )
 	-- body
 end
 
-function skill_action:effect( ... )
+function skill:effect( ... )
 	-- body
 	--if had buff, add buff
 	--do immediate damage
 end
 
-function skill_action:update( ... )
+function skill:update( ... )
 	-- body
 	if self.state == 'init' then
 		if self:target() ~= nil then
@@ -70,4 +70,3 @@ function skill_action:update( ... )
 	end
 end
 
-return skill_action
