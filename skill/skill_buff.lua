@@ -135,7 +135,7 @@ function skill_buff:get_remain_tick(buff_data, create_time, elapse_tick)
 end
 
 --把属性影响更新到表
-function skill_buff:UpdateAttrEffectTo(attrTable)
+function skill_buff:update_attr_effect_to(attrTable)
 	for k, v in pairs(self.attr_effect) do
 		if not attrTable[k] then
 			attrTable[k] = v
@@ -147,7 +147,7 @@ function skill_buff:UpdateAttrEffectTo(attrTable)
 end
 
 --获取单个属性影响值
-function skill_buff:GetAttrEffect(attrName)
+function skill_buff:get_attr_effect(attrName)
 	return self.attr_effect[attrName] or 0
 end
 
@@ -170,8 +170,8 @@ function skill_buff:add(buff_id, create_time, elapse_tick)
     self:remove(buff_id)
 
     --覆盖Buff
-	for _, replace_buffID in pairs(buff_data.replace_buff) do
-    	self:remove(replace_buffID)
+	for _, replace_buff_id in pairs(buff_data.replace_buff) do
+    	self:remove(replace_buff_id)
 	end
 
     --加入属性效果
