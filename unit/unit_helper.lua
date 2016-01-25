@@ -241,6 +241,7 @@ end
 
 function unit_helper.init()
 	-- body
+	print('init')
 	for i = 1, 10 do
 		local u = unit_helper.random_unit()
 		unit_mgr.add_unit(u)
