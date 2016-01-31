@@ -1,4 +1,5 @@
 require 'new'
+
 local timer = require('timer')
 local timer_mgr = {}
 
@@ -15,8 +16,9 @@ function timer_mgr.update()
 		if tick <= cur_tick then
 			print('tick:' .. tick .. ' queue:' .. #queue)
 			for _, item in ipairs( queue ) do
-				print('item:' .. item.id .. ' cur times:' .. item.cur_times .. ' func:' .. type(item.func) .. ' item.entity:' .. type(item.entity))
-				if item.func and item.func(item.entity) then
+				print('item:' .. item.id .. ' cur times:' .. item.cur_times .. ' func:' .. type(item.func) .. ' item.obj:' .. type(item.obj))
+				if item.func then
+					item.func(item.obj, item.id, table.unpack(item.params))
 					item:inc()
 					local new_tick = item:get_next_tick(cur_tick)
 					if new_tick > 0 then
@@ -36,15 +38,20 @@ function timer_mgr.update()
 	end
 end
 
-function timer_mgr.add_timer(obj, func, total_times, start, interval )
-	-- body
+function timer_mgr.add_timer(obj, func, total_times, start, interval, ...)
+	print(...)
+	total_times = total_times or 1
+	start = start or 0
+	interval = interval or 0
+
 	local item = new(timer, timer_id)
-	item.entity = obj
+	item.obj = obj
 	item.func = func
 	item.total_times = total_times
 	item.start_tick = start + cur_tick
-	item.interval_tick = interval
-	
+	item.interval_tick = interval or 0
+	item.params = table.pack(...)
+
 	timer_id = timer_id + 1
 	local new_queue = timer_queue[item.start_tick] or {}
 	new_queue[item.id] = item
