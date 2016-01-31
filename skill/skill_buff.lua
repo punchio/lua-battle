@@ -1,10 +1,6 @@
+local timer_mgr = require("timer_mgr")
 
 -- 技能Buff
-local skill_buff_data   = {}
-
-
-local NOTIFY_EVENT_VIP_LEVEL  	  = 1			  --VIP等级通知事件
-
 
 --消息提示，对应ChineseData.xml表定义
 local TEXT_BUFF_UNKNOWN           = 1004001       --未知的Buff错误
@@ -12,13 +8,14 @@ local TEXT_BUFF_CANT_ADD          = 1004002       --不可添加Buff
 local TEXT_BUFF_CANT_CREATE 	  = 1004003 	  --无法创建Buff
 
 
-skill_buff 				= {}
+local skill_buff 				= {}
 skill_buff.__index 		= skill_buff
 
-function skill_buff:InitData()
-    skill_buff_data = parse_csv() -- 读取csv
-    if skill_buff_data then
-        for k, v in pairs(skill_buff_data) do
+local csv_skill_buff_data   = {}
+function skill_buff.init_data()
+    csv_skill_buff_data = parse_csv('CSVSkillBuff.csv') -- 读取csv
+    if csv_skill_buff_data then
+        for k, v in pairs(csv_skill_buff_data) do
             local buff_data = v
             if not buffd
             if not buff_data.total_time then buff_data.total_time = 0 end
@@ -33,7 +30,7 @@ function skill_buff:InitData()
             self:check_attr_effect_data(buff_data)
         end
     else
-    	skill_buff_data = {}
+    	csv_skill_buff_data = {}
     end
 end
 
@@ -58,7 +55,7 @@ end
 
 function skill_buff:check_attr_effect_data(buff_data)
 	local attr_effect 		= buff_data.attr_effect
-	buff_data.attr_effect 	= lua_map:new()
+	buff_data.attr_effect 	= {}
 	if not attr_effect then return end
 
 	for k, v in pairs(attr_effect) do
@@ -68,14 +65,16 @@ function skill_buff:check_attr_effect_data(buff_data)
 	end
 end
 
-function skill_buff:ctor(owner, skill)
-    self.ptr      = {}
-    setmetatable(self.ptr,    {__mode = "v"})
+function skill_buff:new(owner, skill_mgr)
+	local new_obj    = {}
+    new_obj.ptr      = {}
+    setmetatable(new_obj,        {__index = skill_buff})
+    setmetatable(new_obj.ptr,    {__mode = "v"})
 
     self.ptr.owner	= owner
-    self.ptr.skill	= skill
+    self.ptr.skill_mgr	= skill_mgr
 
-    --技能Buff背包
+    --技能Buff背包 key:buff_id val:timer_ids val:param]
     self.buff_bag 		= {}
 
     --属性影响
@@ -83,18 +82,20 @@ function skill_buff:ctor(owner, skill)
 
     --状态影响
     self.state_effect 	= {}
+
+    return new_obj
 end
 
 function skill_buff:del()
 	for buff_id, _ in pairs(self.buff_bag) do
-		self:remove(buff_id)
+		self.buff_bag = nil
 	end
 end
 
 function skill_buff:on_die()
 	for buff_id, _ in pairs(self.buff_bag) do
 		local buff_data = self:get_buff_data(buff_id)
-		if buff_data.remove_mode == 1 then
+		if buff_data then
 			self:remove(buff_id)
 		end
 	end
@@ -104,32 +105,29 @@ end
 
 --获取技能Buff对象，若不存在则返回nil
 function skill_buff:get_buff_data(buff_id)
-    if not skill_buff_data then return nil end
-    return skill_buff_data[buff_id]
+    if not csv_skill_buff_data then return nil end
+    return csv_skill_buff_data[buff_id]
 end
 
 --判断身上是否存在指定的技能Buff，返回true/false
 function skill_buff:has(buff_id)
-	return (self.buff_bag:find(buff_id) ~= nil)
+	return self.buff_bag[buff_id] ~= nil
 end
 
 --获取技能Buff对象已过时间
-function skill_buff:get_elapse_tick(buff)
-	local elapse_tick = mogo.getTickCount() - buff.start_time.sys_tick
+function skill_buff:get_elapse_tick(buff_obj)
+	local elapse_tick = mogo.getTickCount() - buff_obj.start_time.sys_tick
 	if elapse_tick < 0 then elapse_tick = 0 end
-	elapse_tick = elapse_tick + buff.start_time.buff_tick
-	return elapse_tick
+	elapse_tick = elapse_tick + buff_obj.start_time.buff_tick
+	return timer_mgr.now() - buff_obj.start_tick
 end
 
 --获取技能Buff剩余时间（返回负数代表无限期）
-function skill_buff:get_remain_tick(buff_data, create_time, elapse_tick)
+function skill_buff:get_remain_tick(buff_data, elapse_tick)
 	if buff_data.total_time == 0 then return -1 end
 
 	local remainTick = buff_data.total_time - elapse_tick
-	if buff_data.saveDB == 1 then
-		--按绝对时间计算
-		remainTick = buff_data.total_time - (os.time() - create_time) * 1000
-	end
+
 	if remainTick < 0 then remainTick = 0 end
 	return remainTick
 end
@@ -152,47 +150,27 @@ function skill_buff:get_attr_effect(attrName)
 end
 
 --添加技能Buff，成功返回0
-function skill_buff:add(buff_id, create_time, elapse_tick)
-	create_time = create_time or os.time()
-    elapse_tick = elapse_tick or 0
+function skill_buff:add(buff_id)
     --log_game_debug("skill_buff:add", "buff_id=%s, elapse_tick=%s", buff_id, elapse_tick)
 
-	local buff_data = self:get_buff_data(buff_id)
-    if not buff_data then return TEXT_BUFF_UNKNOWN end
+	local csv_buff_data = self:get_buff_data(buff_id)
+    if not csv_buff_data then return TEXT_BUFF_UNKNOWN end
 
-    if self:can_add(buff_data) ~= true then return TEXT_BUFF_CANT_ADD end
+    if self:can_add(csv_buff_data) ~= true then return TEXT_BUFF_CANT_ADD end
 
 	local owner 	= self.ptr.owner
-    local buff 	= self:create(buff_data, create_time, elapse_tick)
-    if not buff then return TEXT_BUFF_CANT_CREATE end
-
-    --移除自身相同Buff
-    self:remove(buff_id)
+    local buff_obj 	= self:create(csv_buff_data)
+    if not buff_obj then return TEXT_BUFF_CANT_CREATE end
 
     --覆盖Buff
-	for _, replace_buff_id in pairs(buff_data.replace_buff) do
+	for _, replace_buff_id in pairs(csv_buff_data.replace_buff) do
     	self:remove(replace_buff_id)
 	end
 
-    --加入属性效果
-    self:update_attr_effect(buff_data, true)
-
-    --加入相关状态，待处理
-    self:update_state_effect(buff_data, true)
-
     --把对象加入Buff背包
-    self.buff_bag:insert(buff_id, buff)
+    self.buff_bag[buff_id] = buff_obj
 
-    --通知事件：开始
-    self:NotifyEvent_Start(buff_data)
-
-    --视野广播
-    local remainTick = self:get_remain_tick(buff_data, create_time, elapse_tick)
-    if remainTick < 0 then remainTick = 0 end
-    owner:broadcastAOI(true, "SkillBuffResp", owner:getId(), buff_id, 1, remainTick)
-    self:UpdateBuffToClient(buff_data, true)
-
-    log_game_debug("skill_buff:add", "OK! buff_id=%s", buff_id)
+    self:enable(buff_id)
 
 	return 0
 end
@@ -201,22 +179,24 @@ end
 function skill_buff:remove(buff_id)
     log_game_debug("skill_buff:remove", "buff_id=%s", buff_id)
 
-	local buff = self.buff_bag:find(buff_id)
-	if not buff then return end
+	local buff_obj = self.buff_bag:find(buff_id)
+	if not buff_obj then return end
 
 	--删除停止定时器
 	local owner = self.ptr.owner
-	if buff.stop_timer_id ~= 0 then
-		owner:delLocalTimer(buff.stop_timer_id)
-		buff.stop_timer_id = 0
+	if buff_obj.stop_timer_id ~= 0 then
+		owner:delLocalTimer(buff_obj.stop_timer_id)
+		buff_obj.stop_timer_id = 0
 	end
 
 	--删除激活技能的定时器
-	for _, timerID in pairs(buff.skill_timer_ids) do
+	for _, timerID in pairs(buff_obj.skill_timer_ids) do
 		owner:delLocalTimer(timerID)
 	end
 
-	self:Destory(buff_id)
+	self:disable(buff_id)
+
+	self.buff_bag[buff_id] = nil
 end
 
 
@@ -233,85 +213,59 @@ function skill_buff:can_add(buff_data)
 end
 
 --创建Buff对象
-function skill_buff:create(buff_data, create_time, elapse_tick)
-	local stop_tick = self:get_remain_tick(buff_data, create_time, elapse_tick)
-	if stop_tick == 0 then return nil end
-
+function skill_buff:create(buff_data)
 	local owner 	= self.ptr.owner
     local skill 	= self.ptr.skill
-	local start_time = {create_time = create_time, sys_tick = mogo.getTickCount(), buff_tick = elapse_tick}
-	local buff 	= {start_time = start_time, stop_timer_id = 0, skill_timer_ids = {}}
+	local buff_obj 	= {start_time = timer_mgr.now(), stop_timer_id = 0, skill_timer_ids = {}}
 
 	--设置停止定时器
-	if buff_data.total_time > 0 and stop_tick > 0 then
-    	local stop_timer_id 	= owner:addLocalTimer("ProcSkillBuffStopTimer", stop_tick, 1, buff_data.id)
-    	buff.stop_timer_id = stop_timer_id
+	if buff_data.total_time > 0 then
+    	local stop_timer_id 	= owner:addLocalTimer("ProcSkillBuffStopTimer", buff_data.total_time, 1, buff_data.id)
+    	buff_obj.stop_timer_id = stop_timer_id
 	end
 
 	--设置激活技能的定时器
 	for startTick, skillID in pairs(buff_data.active_skill) do
-		if startTick >= elapse_tick then
-			local skillTick = startTick - elapse_tick
-			if skill:GetSkill(skillID) then
-	    		local skillTimerID 	= owner:addLocalTimer("ProcSkillBuffTimer", skillTick, 1, buff_data.id, skillID)
-	    		table.insert(buff.skill_timer_ids, skillTimerID)
-			end
+		if skill:GetSkill(skillID) then
+    		local skillTimerID 	= owner:addLocalTimer("ProcSkillBuffTimer", startTick, 1, buff_data.id, skillID)
+    		table.insert(buff_obj.skill_timer_ids, skillTimerID)
 		end
 	end
 
-	return buff
+	return buff_obj
 end
 
---删除Buff
-function skill_buff:Destory(buff_id)
-  	local owner 	= self.ptr.owner
+function skill_buff:enable( buff_id )
+	local csv_buff_data = self:get_buff_data(buff_id)
+	if not csv_buff_data then return end
 
-    log_game_debug("skill_buff:Destory", "buff_id=%s", buff_id)
+    --加入属性效果
+    self:update_attr_effect(csv_buff_data, true)
 
-	--移除属性效果
-    local buff_data = self:get_buff_data(buff_id)
-    self:update_attr_effect(buff_data, false)
+    --加入相关状态，待处理
+    self:update_state_effect(csv_buff_data, true)
+end
+
+function skill_buff:disable( buff_id )
+    local csv_buff_data = self:get_buff_data(buff_id)
+    if not csv_buff_data then return end
+    
+    --移除属性效果
+    self:update_attr_effect(csv_buff_data, false)
 
 	--移除相关状态，待处理
-    self:update_state_effect(buff_data, false)
-
-    --移除Buff背包中的对象
-    self.buff_bag:erase(buff_id)
-
-    --通知事件：停止
-    self:NotifyEvent_Stop(buff_data)
-
-    --视野广播
-    owner:broadcastAOI(true, "SkillBuffResp", owner:getId(), buff_id, 0, 0)
-    self:UpdateBuffToClient(buff_data, false)
-end
-
-function skill_buff:NotifyEvent_Start(buff_data)
-	if buff_data.notifyEvent == 1 then
-  		local owner 		= self.ptr.owner
-  		if owner.c_etype ~= public_config.ENTITY_TYPE_AVATAR then return end
-
-		local maxVipLevel 	= self:GetMaxVipLevel()
-		owner.base.VipBuffNoitfy(0, maxVipLevel)
-	else
-		return
-	end
-end
-
-function skill_buff:NotifyEvent_Stop(buff_data)
-	if buff_data.notifyEvent == 1 then
-  		local owner 		= self.ptr.owner
-  		if owner.c_etype ~= public_config.ENTITY_TYPE_AVATAR then return end
-
-		local maxVipLevel 	= self:GetMaxVipLevel()
-		owner.base.VipBuffNoitfy(1, maxVipLevel)
-	else
-		return
-	end
+    self:update_state_effect(csv_buff_data, false)
 end
 
 --更新属性效果
 function skill_buff:update_attr_effect(buff_data, is_add)
+	local buff_obj = self.buff_bag[buff_data.id]
+	if not buff_obj then return end
+
+	if buff_obj.effect_update == is_add then return end
+
+	buff_obj.effect_update = is_add
+
 	local changed = false
 	for k, v in pairs(buff_data.attr_effect) do
 		changed = true
@@ -334,6 +288,13 @@ end
 --更新状态效果
 function skill_buff:update_state_effect(buff_data, is_add)
 	if #buff_data.append_state == 0 then return end
+
+	local buff_obj = self.buff_bag[buff_data.id]
+	if not buff_obj then return end
+
+	if buff_obj.state_update == is_add then return end
+
+	buff_obj.state_update = is_add
 
 	if is_add == true then
 		for _, state_id in pairs(buff_data.append_state) do
@@ -376,7 +337,7 @@ end
 function skill_buff:ProcSkillBuffStopTimer(timerID, activeCount, buff_id)
     log_game_debug("skill_buff:ProcSkillBuffStopTimer", "buff_id=%s", buff_id)
 
-	self:Destory(buff_id)
+	self:destroy(buff_id)
 end
 
 --处理激活技能的定时器
@@ -393,3 +354,4 @@ end
 
 
 
+return skill_buff

@@ -1,5 +1,8 @@
 local skill_calculate = {}
 
+skill_calculate.unit = nil
+skill_calculate.target = nil
+
 local formulas = {}
 
 function skill_calculate.init()
@@ -15,7 +18,10 @@ function skill_calculate.init()
 	formulas[4] =  load("return function(attr) return get_attr(attr) end", nil, nil, calc.env_funcs)()
 end
 
-function skill_calculate.calculate( express, ... )
+function skill_calculate.calculate( express, unit, target)
+	skill_calculate.unit = unit
+	skill_calculate.target = target
+	
 	local func = formulas[express]
 	if not func then
 		func = load(expresss, nil, nil, calc.env_funcs)()

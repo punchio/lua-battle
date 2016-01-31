@@ -76,4 +76,8 @@ function timer_mgr.has_timer( id )
 	return id2queue[id] ~= nil
 end
 
+function timer_mgr.now()
+	return cur_tick
+end
+
 return timer_mgr
