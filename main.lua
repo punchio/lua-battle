@@ -1,5 +1,5 @@
 local root = 'D:/Git/lua-battle/'
-package.path = string.format("%s;%s?.lua;%saction/?.lua;%sfsm/?.lua;%sunit/?.lua", package.path, root, root, root, root)
+package.path = string.format("%s;%s?.lua;%sskill/?.lua;%stimer/?.lua;%sfsm/?.lua;%sunit/?.lua", package.path, root, root, root, root, root)
 
 local timer_mgr = require('timer_mgr')
 local action_mgr = require("action_mgr")
