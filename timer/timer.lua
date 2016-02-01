@@ -1,14 +1,13 @@
 local timer = {}
 
-function timer:ctor(id, ...)
+function timer:ctor(id)
 	self.id = id
 	self.start_tick = 0
 	self.interval_tick = 0
 	self.total_times = 0
 	self.cur_times = 0
-	self.obj = nil
+	self.entity = nil
 	self.func = nil
-	self.params = nil
 end
 
 function timer:inc()
