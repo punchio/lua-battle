@@ -1,58 +1,41 @@
 require("new")
-local unit = require("unit")
-local unit_mgr = require("unit_mgr")
-local fsm_mgr = require("fsm_mgr")
-local ai_mgr = require("example")
+require("common")
+
 
 local unit_helper = {}
 
-function unit_helper.random_unit( )
-	-- body
-	print('unit helper random units.')
-	local u = new(unit, unit_mgr.pop_free_id())
-	u:set_raw_attribute('side', u.id % 2)
-	print('side:' .. u:get_raw_attribute('side'))
+--[[
+BATTLE_PROPS_CONFIG = {
+	MAX_HP = 1,
+	CUR_HP = 2,
+	PHY_ATK_POWER = 3, 
+	PHY_DFS_POWER = 4,
+	MAG_ATK_POWER = 5,
+	MAG_DFS_POWER = 6,
 
-	u:set_raw_attribute('maxhp', 1000)
-	u:set_raw_attribute('hp', 1000)
-	print('hp:' .. u:get_raw_attribute('hp'))
+	STRENGTH = 7,
+	AGILITY = 8,
+	INTELLIGENCE = 9,
+	SPEED = 10,
+}]]
+local unit_mgr
 
-	u:set_raw_attribute('str', math.random(20) + 50)
-	print('str:' .. u:get_raw_attribute('str'))
-
-	u:set_raw_attribute('vel', math.random(3) + 3)
-	print('vel:' .. u:get_raw_attribute('vel'))
-
-	u:set_raw_attribute('pos', {math.random(50) + 50, math.random(50) + 50, math.random(50) + 50})
-	print('pos:' .. u:get_raw_attribute('pos')[1], u:get_raw_attribute('pos')[2], u:get_raw_attribute('pos')[3])
-
-	u:set_raw_attribute('move', nil)
-	u:set_raw_attribute('attack_range', (math.random() > 0.5 and 3) or 10)
-	print('range:' .. u:get_raw_attribute('attack_range'))
-	u:set_raw_attribute('attack', 0)
-	u:set_raw_attribute('defence', 0)
-	u:set_raw_attribute('skill', {0})
-	u:set_raw_attribute('spell', 0)
-	u:set_raw_attribute('attack_speed', math.random(3) + 3)
-	print('speed:' .. u:get_raw_attribute('attack_speed'))
-	u:set_raw_attribute('attack_time', 0)
-	u:set_raw_attribute('state_id', 'invalid')
-	return u
+function unit_helper.init( mgr )
+	print('unit_helper.init')
+	unit_mgr = mgr
+	for i = 1, 10 do
+		local u = unit_mgr.random_unit()
+		unit_mgr.add_unit(u)
+	end
 end
 
-function unit_helper.distance(pos1, pos2)
-	-- body
-	if not pos1 or not pos2 then
-		return 100
-	end
-	return math.sqrt((pos1[1] - pos2[1]) * (pos1[1] - pos2[1]) + (pos1[2] - pos2[2]) * (pos1[2] - pos2[2]) + (pos1[3] - pos2[3]) * (pos1[3] - pos2[3]))
+
+function unit_helper.distance(x1, y1, x2, y2)
+	return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 end
 
-function unit_helper.square_distance(pos1, pos2)
-	if not pos1 or not pos2 then
-		return 10000
-	end
-	return (pos1[1] - pos2[1]) * (pos1[1] - pos2[1]) + (pos1[2] - pos2[2]) * (pos1[2] - pos2[2]) + (pos1[3] - pos2[3]) * (pos1[3] - pos2[3])
+function unit_helper.square_distance(x1, y1, x2, y2)
+	return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
 end
 
 function unit_helper.moveto(pos1, pos2, length)
@@ -73,13 +56,15 @@ end
 
 function unit_helper.attack_nearby(u)
 	-- body
-	local side = u:get_raw_attribute('side')
-	local range = u:get_raw_attribute('attack_range')
+	local side = u.side
+	local range = 5
 	local target = nil
 	local min_dist = 0
 	for _, v in pairs( unit_mgr.units ) do
-		if v:get_raw_attribute('side') ~= side and v:get_raw_attribute('hp') > 0 then
-			local dist = unit_helper.distance(u:get_raw_attribute('pos'), v:get_raw_attribute('pos'))
+		if v.side ~= side and v:get_raw_attribute(BATTLE_PROPS_CONFIG.CUR_HP) > 0 then
+			local x1, y1 = u:get_position()
+			local x2, y2 = v:get_position()
+			local dist = unit_helper.distance(x1, y1, x2, y2)
 			if dist < range and (min_dist == 0 or min_dist > dist) then
 				min_dist = dist
 				target = v
@@ -88,7 +73,6 @@ function unit_helper.attack_nearby(u)
 	end
 
 	if target then
-		u:set_raw_attribute('attack', target.id)
 		print('unit:' .. u.id .. ' get target:' .. target.id)
 	else
 		print('unit:' .. u.id .. ' cant find nearby target.')
@@ -98,13 +82,15 @@ end
 
 function unit_helper.find_closest_target(u)
 	-- body
-	local side = u:get_raw_attribute('side')
-	local range = u:get_raw_attribute('attack_range')
+	local side = u.side
+	local range = 5
 	local target = nil
 	local min_dist = 0
 	for _, v in pairs( unit_mgr.units ) do
-		if v:get_raw_attribute('side') ~= side and v:get_raw_attribute('hp') > 0 then
-			local dist = unit_helper.distance(u:get_raw_attribute('pos'), v:get_raw_attribute('pos'))
+		if v.side ~= side and v:get_raw_attribute(BATTLE_PROPS_CONFIG.CUR_HP) > 0 then
+			local x1, y1 = u:get_position()
+			local x2, y2 = v:get_position()
+			local dist = unit_helper.distance(x1, y1, x2, y2)
 			if dist < 1000 and (min_dist == 0 or min_dist > dist) then
 				min_dist = dist
 				target = v
@@ -121,14 +107,14 @@ function unit_helper.can_attack( unit, target )
 		return false
 	end
 
-	return unit:get_raw_attribute('attack_range') > unit_helper.distance(unit:get_raw_attribute('pos'), target:get_raw_attribute('pos'))
+	return 5 > unit_helper.distance(unit:get_position(), target:get_position())
 end
 
 function unit_helper.get_enemy_units( side )
 	-- body
 	local enemy = {}
 	for _, v in pairs( unit_mgr.units ) do
-		if v:get_raw_attribute('side') ~= side then
+		if v.side ~= side then
 			table.insert(enemy, v)
 		end
 	end
@@ -143,7 +129,7 @@ end
 
 function unit_helper.get_move_pos( u )
 	-- body
-	local move = u:get_raw_attribute('move')
+	local move = u:get_dest_position()
 	if not move then
 		return nil
 	end
@@ -154,7 +140,7 @@ function unit_helper.get_move_pos( u )
 		if not tar then
 			return nil
 		end
-		return tar:get_raw_attribute('pos')
+		return tar:get_position()
 	elseif t == 'table' then
 		return move
 	end
@@ -168,7 +154,7 @@ function unit_helper.move(u, move_time)
 	if move_time <= 0 then
 		return
 	end
-	local pos, move = u:get_raw_attribute('pos'), unit_helper.get_move_pos(u)
+	local pos, move = u:get_position(), unit_helper.get_move_pos(u)
 	if not move then
 		print('unit_helper tar lost, unit id:' .. u.id)
 		return
@@ -177,9 +163,9 @@ function unit_helper.move(u, move_time)
 	local move_dist = u:get_attribute('vel') * move_time
 	local dist = unit_helper.distance(pos, move)
 	if dist > move_dist then
-		u:set_raw_attribute('pos', unit_helper.moveto(pos, move, move_dist))
+		u:set_dest_position(unit_helper.moveto(pos, move, move_dist))
 	else
-		u:set_raw_attribute('pos', move)
+		u:set_position(move)
 	end
 end
 
@@ -226,8 +212,8 @@ function unit_helper.check_finish()
 	-- body
 	local alive_side
 	for _, v in pairs( unit_mgr.units ) do
-		if v:get_raw_attribute('state_id') ~= 'dead' then
-			local side = v:get_raw_attribute('side')
+		if v:get_cur_state() ~= STATE_CONFIG.DEAD then
+			local side = v.side
 			if not alive_side then
 				alive_side = side
 			elseif alive_side ~= side then
@@ -239,64 +225,33 @@ function unit_helper.check_finish()
 	return true
 end
 
-function unit_helper.init()
-	-- body
-	print('init')
-	for i = 1, 10 do
-		local u = unit_helper.random_unit()
-		unit_mgr.add_unit(u)
-	end
-end
-
-function unit_helper.add_unit(side, force, hp, skill, posx, posy, range, velocity)
-	-- body
-	local u = new(unit, unit_mgr.pop_free_id())
-	u:set_raw_attribute('side', side)
-	u:set_raw_attribute('maxhp', hp)
-	u:set_raw_attribute('hp', hp)
-	u:set_raw_attribute('str', force)
-	u:set_raw_attribute('vel', velocity)
-	u:set_raw_attribute('pos', {posx, 0, posy})
-	u:set_raw_attribute('attack_range', range)
-	u:set_raw_attribute('skill', skill)
-	--default value
-	u:set_raw_attribute('move', nil)
-	u:set_raw_attribute('attack', 0)
-	u:set_raw_attribute('defence', 0)
-	u:set_raw_attribute('spell', 0)
-	v:set_raw_attribute('auto-attack', false)
-	--u:set_raw_attribute('attack_time', 0)
-	--u:set_raw_attribute('attack_speed', 0)
-	u:set_raw_attribute('state_id', 'invalid')
-end
-
 function unit_helper.update(time_delta)
 	--input operations
-	for _, v in pairs( unit_mgr.units ) do
-		if v:get_raw_attribute('state_id') == 'idle' then
-			local unit_ai = ai_mgr[v.id]
-			if unit_ai then
-				print('unit id:' .. v.id .. '|length:' .. #unit_ai)
-				local idx = v:get_raw_attribute('ai') or 1
-				if idx > #unit_ai then
-					idx = 1
-					print( 'max to 1:' .. v.id )
-				end
-				print('idx:' .. idx)
-				local action, value = unit_ai[idx]['action'], unit_ai[idx]['value']
-				print('action:' .. action)
-				if action == 'attack' and not value then
-					action = 'auto-attack'
-					value = true
-				else
-					v:set_raw_attribute('auto-attack', false)
-				end
-				--print('action:' .. action .. '|value:' .. value)
-				v:set_raw_attribute(action, value)
-				v:set_raw_attribute('ai', idx + 1)
-			end
-		end
-	end
+	--for _, v in pairs( unit_mgr.units ) do
+	--	if v:get_raw_attribute('state_id') == 'idle' then
+	--		local unit_ai = ai_mgr[v.id]
+	--		if unit_ai then
+	--			print('unit id:' .. v.id .. '|length:' .. #unit_ai)
+	--			local idx = v:get_raw_attribute('ai') or 1
+	--			if idx > #unit_ai then
+	--				idx = 1
+	--				print( 'max to 1:' .. v.id )
+	--			end
+	--			print('idx:' .. idx)
+	--			local action, value = unit_ai[idx]['action'], unit_ai[idx]['value']
+	--			print('action:' .. action)
+	--			if action == 'attack' and not value then
+	--				action = 'auto-attack'
+	--				value = true
+	--			else
+	--				v:set_raw_attribute('auto-attack', false)
+	--			end
+	--			--print('action:' .. action .. '|value:' .. value)
+	--			v:set_raw_attribute(action, value)
+	--			v:set_raw_attribute('ai', idx + 1)
+	--		end
+	--	end
+	--end
 end
 
 return unit_helper

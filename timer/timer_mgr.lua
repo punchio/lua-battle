@@ -3,13 +3,13 @@ require 'new'
 local timer = require('timer')
 local timer_mgr = {}
 
-local cur_tick = os.clock()
+local cur_tick = 1
 local timer_id = 1
 local timer_queue = {}
 local id2queue = {}
 
-function timer_mgr.update()
-	cur_tick = os.clock()
+function timer_mgr.update(time_delta)
+	cur_tick = cur_tick + time_delta
 
 	local rm = {}
 	for tick, queue in pairs(timer_queue) do
@@ -39,7 +39,6 @@ function timer_mgr.update()
 end
 
 function timer_mgr.add_timer(obj, func, total_times, start, interval, ...)
-	print(...)
 	total_times = total_times or 1
 	start = start or 0
 	interval = interval or 0
@@ -50,6 +49,7 @@ function timer_mgr.add_timer(obj, func, total_times, start, interval, ...)
 	item.total_times = total_times
 	item.start_tick = start + cur_tick
 	item.interval_tick = interval or 0
+	item.stop_tick = item.start_tick + item.interval_tick * item.total_times
 	item.params = table.pack(...)
 
 	timer_id = timer_id + 1
@@ -62,7 +62,6 @@ function timer_mgr.add_timer(obj, func, total_times, start, interval, ...)
 end
 
 function timer_mgr.remove_timer( id )
-	-- body
 	local queue_id = id2queue[id]
 	id2queue[id] = nil
 	if not queue_id then
@@ -79,8 +78,24 @@ function timer_mgr.remove_timer( id )
 end
 
 function timer_mgr.has_timer( id )
-	-- body
 	return id2queue[id] ~= nil
+end
+
+function timer_mgr.get_remain_time( id )
+	local queue_id = id2queue[id]
+	if not queue_id then return 0 end
+
+	local queue = timer_queue[queue_id]
+	if not queue then return 0 end
+
+	local timer = queue[id]
+	if not timer then return 0 end
+
+	if timer.total_times == 0 then
+		return 'N/A'
+	else
+		return timer.stop_tick - cur_tick
+	end
 end
 
 function timer_mgr.now()

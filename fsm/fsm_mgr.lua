@@ -1,8 +1,9 @@
-local unit_mgr = require("unit_mgr")
+local unit_manager
 local fsm_mgr = {}
 
-function fsm_mgr.init( ... )
+function fsm_mgr.init( mgr )
 	print('\nfsm mgr init manager.\n')
+	unit_manager = mgr
 	fsm_mgr.states = {}
 
 	local config = require("_config_fsm")
@@ -28,12 +29,11 @@ function fsm_mgr.change_state(unit, state_id)
 	end
 
 	-- exit old state
-	local old = fsm_mgr.states[unit:get_raw_attribute('state_id')]
+	local old = fsm_mgr.states[unit:get_cur_state()]
 	if not old then
-		print('invalid old state, unit:' .. unit.id .. '|state:' .. unit:get_raw_attribute('state_id'))
+		print('invalid old state, unit:' .. unit.id .. '|state:' .. unit:get_cur_state())
 	else
 		old:exit(unit)
-		unit:set_raw_attribute('state_id', 'invalid')
 	end
 
 	-- enter new state
@@ -49,16 +49,15 @@ function fsm_mgr.change_state(unit, state_id)
 	end
 
 	new:enter(unit)
-	unit:set_raw_attribute('state_id', new.id)
-
+	unit:set_cur_state(new.id)
 end
 
 function fsm_mgr.update(time_delta)
 	print('\nfsm mgr update.')
 	local rm = {}
-	for _, v in pairs( unit_mgr.units ) do
-		print('\nfsm mgr update unit:' .. v.id .. '|state id:' .. v:get_raw_attribute('state_id'))
-		local cur = fsm_mgr.states[v:get_raw_attribute('state_id')]
+	for _, v in pairs( unit_manager.units ) do
+		print('\nfsm mgr update unit:' .. v.id .. '|state id:' .. v:get_cur_state())
+		local cur = fsm_mgr.states[v:get_cur_state()]
 		if not cur then
 			fsm_mgr.change_state(v, fsm_mgr.default_state.id)
 			cur = fsm_mgr.default_state
@@ -66,28 +65,17 @@ function fsm_mgr.update(time_delta)
 
 		local new_type = cur:check_transition(v)
 		if new_type ~= cur.id then
-
 			-- exit old state
 			cur:exit(v)
-			v:set_raw_attribute('state_id', 'invalid')
 
 			-- enter new state
 			cur = fsm_mgr.states[new_type] or fsm_mgr.default_state
 			cur:enter(v)
-			v:set_raw_attribute('state_id', cur.id)
+			v:set_cur_state(cur.id)
 		end
 
-		-- update cur state
 		cur:update(v, time_delta)
-
-		--if cur.id == 'dead' then
-		--	table.insert(rm, v.id)
-		--end
 	end
-
-	--for _, v in ipairs( rm ) do
-	--	unit_mgr.remove_unit(v)
-	--end
 
 	print('\nfsm mgr update finish.')
 end

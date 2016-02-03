@@ -1,18 +1,19 @@
-local ACTION_POINT = {
-	ENTER_MOVE = 'enter-move',
-	LEAVE_MOVE = 'leave-move',
-	MOVE_BEFORE	= 'move-before',
-	MOVE_AFTER = 'move-after',
-
-	ENTER_ATTACK = 'enter-attack',
-	LEAVE_ATTACK = 'leave-attack',
-	ATTACK_BEFORE = 'attack-before',
-	ATTACK_AFTER = 'attack-after',
-
-	ENTER_SPELL	= 'enter-spell',
-	LEAVE_SPELL	= 'leave-spell',
-	SPELL_BEFORE = 'spell-before',
-	SPELL_AFTER	= 'spell-after',
+STATE_CONFIG = {
+	DEAD = 1,
+	MOVE = 2,
+	IDLE = 3,
 }
 
-return ACTION_POINT
+BATTLE_PROPS_CONFIG = {
+	MAX_HP = 1,
+	CUR_HP = 2,
+	PHY_ATK_POWER = 3, 
+	PHY_DFS_POWER = 4,
+	MAG_ATK_POWER = 5,
+	MAG_DFS_POWER = 6,
+
+	STRENGTH = 7,
+	AGILITY = 8,
+	INTELLIGENCE = 9,
+	SPEED = 10,
+}
