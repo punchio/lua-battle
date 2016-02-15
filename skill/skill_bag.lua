@@ -1,5 +1,5 @@
 -- 技能背包
-
+require('log')
 local skill_bag = {}
 
 function skill_bag:ctor(owner, skill_mgr)
@@ -17,7 +17,8 @@ end
 
 function skill_bag:add(skill_id)
 	if self:has(skill_id) == true then return false end
-	self.skill_bag[skill_id] = 1 
+	log_print('detail', 'skill bag mark cast tick:',tick, '|skill:', skill_id, '|owner:', self.ptr.owner.id)
+    self.skill_bag[skill_id] = 1 
 	return true
 end
 
@@ -30,6 +31,7 @@ function skill_bag:has(skill_id)
 end
 
 function skill_bag:mark_cast_tick(skill, tick)
+    log_print('detail', 'skill bag mark cast tick:',tick, '|skill:', skill, '|owner:', self.ptr.owner.id)
     self.cast_tick[skill.id] = tick
 end
 

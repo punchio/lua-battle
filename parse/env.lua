@@ -1,56 +1,121 @@
 require("common")
-local unit_helper = require("unit_helper")
+local unit_mgr = require("unit_mgr")
 local formulas = {}
 local env = {}
 env.g_unit = nil
 env.g_target = nil
 
---local s = 'get_hp(ab, c); get_enemy_agi(1, 2)'
---local trans = string.gsub(s, '_(%w+)%(', '(%1, ')
---print(trans)
---[[local BATTLE_PROPS_CONFIG = {
-	MAX_HP = 1,
-	CUR_HP = 2,
-	PHY_ATK_POWER = 3, 
-	PHY_DFS_POWER = 4,
-	MAG_ATK_POWER = 5,
-	MAG_DFS_POWER = 6,
+env.print = print
 
-	STRENGTH = 7,
-	AGILITY = 8,
-	INTELLIGENCE = 9,
-	SPEED = 10,
-}]]
-
-function env.get_attr( attr, unit )
-	if not unit then unit = cast_unit end
-	if not unit then return 0 end
-	return unit:get_str(attr)
+function env.set_self( unit )
+	env.g_unit = unit
 end
 
-function env.get_enemy_attr( attr, idx )
-	if not cast_targets or #cast_targets < idx then return 0 end
-	return get_str('str', cast_targets[idx])
-end
-
-function env.add_hp( value )
-	env.g_unit:add_hp(value)
-end
-
-function env.get_hp()
-	return env.g_unit:get_attribute(BATTLE_PROPS_CONFIG.CUR_HP)
+function env.set_enemy( target )
+	env.g_target = target
 end
 
 function env.get_self()
 	return env.g_unit
 end
 
-function env.get_closest_enemy()
-	return unit_helper.find_closest_target(env.g_unit)
+function env.get_enemy( idx )
+	if env.g_target and #env.g_target < idx then
+		return env.g_target[idx]
+	else
+		return nil
+	end
 end
 
-function env.add_buff( buff_id )
-	env.g_unit.skill_manager.skill_buff:add(buff_id)
+function env.is_idle(unit)
+	unit = unit or env.g_unit
+	if unit then
+		return unit:get_cur_state() == STATE_CONFIG.IDLE
+	else
+		return true
+	end	
+end
+
+
+function env.get_attr( attr, unit )
+	unit = unit or env.g_unit
+	if unit then
+		return unit:get_attribute(attr)
+	else
+	    return 0
+	end
+end
+
+function env.get_enemy_attr( attr, idx )
+	if not env.g_target or #env.g_target < idx then 
+		return 0 
+	else
+		return env.get_attr(attr, env.g_target[idx])    
+	end
+end
+
+function env.add_hp( value, unit )
+	unit = unit or env.g_unit
+	if unit then
+		unit:add_hp(value)
+	end
+end
+
+function env.add_enemy_hp( value, idx )
+	if env.g_target and #env.g_target >= idx then 
+		env.add_hp(value, env.g_target[idx])
+	end
+end
+
+function env.get_hp(unit)
+	unit = unit or env.g_unit
+	if unit then
+		return unit:get_attribute(BATTLE_PROPS_CONFIG.CUR_HP)
+	else
+	    return 0
+	end
+end
+
+function env.get_enemy_hp( value, idx )
+	if env.g_target and #env.g_target >= idx then 
+		return env.g_target[idx]:get_attribute(BATTLE_PROPS_CONFIG.CUR_HP)
+	else
+	    return 0
+	end
+end
+
+function env.get_closest_enemy(unit)
+	unit = unit or env.g_unit
+	return unit_mgr.find_closest_target(unit)
+end
+
+function env.get_attack_target(unit)
+	unit = unit or env.g_unit
+	local enemy = unit_mgr.find_closest_target(unit)
+	if unit_mgr.can_attack(env.g_unit, enemy) then
+		return enemy
+	else
+		return nil
+	end
+end
+
+function env.add_buff( buff_id, unit)
+	unit = unit or env.g_unit
+	if unit then
+		unit.skill_manager.skill_buff:add(buff_id)
+	end
+end
+
+function env.add_enemy_buff( buff_id, idx )
+	if env.g_target and #env.g_target >= idx then 
+		return env.g_target[idx].skill_manager.skill_buff:add(buff_id)
+	else
+	    return 0
+	end
+end
+
+function env.can_attack( unit )
+	return unit_mgr.can_attack(env.g_unit, unit)
 end
 
 return env

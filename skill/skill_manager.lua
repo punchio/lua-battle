@@ -1,7 +1,10 @@
 require 'new'
 require("parser")
+require('log')
+
 local skill_buff = require 'skill_buff'
 local skill_bag = require 'skill_bag'
+local battle_details = require('battle_details')
 
 local skill_manager = {}
 
@@ -16,7 +19,7 @@ end
 function skill_manager:init_data( )
     --todo fill csv data
     --id  cd  target  condition   effect
-    print('skill_manager init data')
+    log_print('detail', 'skill_manager init data')
     skill_data = {}
 
     local skill = {}
@@ -54,25 +57,26 @@ function skill_manager:init_data( )
 end
 
 function skill_manager:init_default_data( skill )
-    print('skill_manager init_default_data', skill.id)
+    log_print('detail', 'skill_manager init_default_data', skill.id)
     if skill.condition then
-        print('condition')
+        log_print('detail', 'has condition', skill.id)
         skill.condition = Parse(skill.condition)
     end
 
     if skill.target then
-        print('target')
+        log_print('detail', 'has target', skill.id)
         skill.target = Parse(skill.target)
     end
 
     if skill.effect then
-        print('effect')
+        log_print('detail', 'has effect', skill.id)
         skill.effect = Parse(skill.effect)
     end
 end
 
 --new a manager, give it to the owner
 function skill_manager:ctor( owner )
+    log_print('detail', 'skill manager attach to owner:', owner.id)
     self.ptr      = {}
     self.ptr.__mode = 'v'
 
@@ -93,20 +97,32 @@ function skill_manager:get_skill_data( skill_id )
 end
 
 function skill_manager:cast_skill( skill_id )
-    print('cast skill:', skill_id, '|unit:', self.ptr.owner.id)
+    log_print('detail', 'skill manager cast skill:', skill_id, '|owner:', self.ptr.owner.id)
     local skill = self:get_skill_data(skill_id)
-    print(skill == nil)
-    if not skill then return false end
-    print('cast skill skill:', skill_id, '|unit:', self.ptr.owner.id)
+    if not skill then
+        log_print('error', 'skill manager cast skill not exist, skill id:', skill_id, '|owner:', self.ptr.owner.id)
+        return false 
+    end
 
-    if skill.condition and skill.condition(self.ptr.owner, nil) then return false end
-    print('cast skill condition:', skill_id, '|unit:', self.ptr.owner.id)
+    if skill.condition and skill.condition(self.ptr.owner, nil) then 
+        log_print('detail', 'skill manager cast skill fail, condition error.skill id:', skill_id, '|owner:', self.ptr.owner.id)
+        return false 
+    end
 
-    local targets = skill.target and skill.target(self.ptr.owner, nil)
-    print('cast skill targets:', skill_id, '|unit:', self.ptr.owner.id, '|target:', targets == nil)
+    local targets
+    if skill.target then
+        targets = skill.target(self.ptr.owner, nil)
+        if targets then
+            log_print('detail', 'skill manager cast skill find target, count:', #targets, 'skill id:', skill_id, '|owner:', self.ptr.owner.id)
+        else
+            log_print('detail', 'skill manager cast skill find no targets.skill id:', skill_id, '|owner:', self.ptr.owner.id)
+        end
+    end
+
+    battle_details.add(self.id, 'skill', nil, targets)
 
     if skill.effect then 
-        print('cast skill effect:', skill_id, '|unit:', self.ptr.owner.id)
+        log_print('detail', 'skill manager cast skill effect. skill id:', skill_id, '|owner:', self.ptr.owner.id)
         skill.effect(self.ptr.owner, targets)
     end
 end

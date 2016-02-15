@@ -17,4 +17,13 @@ function a1.init()
 	a1.a = 1
 end
 
-return a1
+a1.print = print
+local s = "local function tmp()	print('a') end return tmp()"
+local f = load(s, nil, nil, a1)
+f()
+
+local fc = loadfile('effects/buff_example.lua', nil, a1)
+print(type(fc()))
+for k,v in pairs(fc()) do
+	print(k,v)
+end

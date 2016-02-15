@@ -1,4 +1,5 @@
 require 'new'
+require('log')
 
 local timer = require('timer')
 local timer_mgr = {}
@@ -14,9 +15,9 @@ function timer_mgr.update(time_delta)
 	local rm = {}
 	for tick, queue in pairs(timer_queue) do
 		if tick <= cur_tick then
-			print('tick:' .. tick .. ' queue:' .. #queue)
+			log_print('detail', 'timer mgr update, tick:' .. tick .. ' queue:' .. #queue)
 			for _, item in ipairs( queue ) do
-				print('item:' .. item.id .. ' cur times:' .. item.cur_times .. ' func:' .. type(item.func) .. ' item.obj:' .. type(item.obj))
+				log_print('detail', 'timer mgr update, item:' .. item.id .. ' cur times:' .. item.cur_times .. ' func:' .. type(item.func) .. ' item.obj:' .. type(item.obj))
 				if item.func then
 					item.func(item.obj, item.id, table.unpack(item.params))
 					item:inc()
@@ -25,7 +26,7 @@ function timer_mgr.update(time_delta)
 						local new_queue = timer_queue[new_tick] or {}
 						new_queue[item.id] = item
 						timer_queue[new_tick] = new_queue
-						print('new queue tick:' .. new_tick .. ' cnt:' .. #new_queue .. ' item cur_times:' .. item.cur_times)
+						log_print('detail', 'timer mgr update, add to new queue tick:' .. new_tick .. ' cnt:' .. #new_queue .. ' item cur_times:' .. item.cur_times)
 					end
 				end
 			end
@@ -58,18 +59,25 @@ function timer_mgr.add_timer(obj, func, total_times, start, interval, ...)
 	timer_queue[item.start_tick] = new_queue
 	id2queue[item.id] = item.start_tick
 
+	log_print('detail', 'timer mgr add timer,timer id:', item.id, 
+		'|start_tick:', item.start_tick, 
+		'|stop_tick:', item.stop_tick, 
+		'|interval:', item.interval_tick)
 	return item.id
 end
 
 function timer_mgr.remove_timer( id )
+	log_print('detail', 'timer mgr remove timer, timer id:', id)
 	local queue_id = id2queue[id]
 	id2queue[id] = nil
 	if not queue_id then
+		log_print('warning', 'timer mgr remove timer, timer not exist.timer id:', id)
 		return false
 	end
 
 	local queue = timer_queue[queue_id]
 	if not queue then
+		log_print('warning', 'timer mgr remove timer, timer queue not exist.timer queue id:', queue_id)
 		return false
 	end
 
